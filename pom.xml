@@ -26,7 +26,7 @@
     <groupId>com.google.cloud.samples</groupId>
     <artifactId>shared-configuration</artifactId>
     <version>1.0.1</version>
-   </parent>
+  </parent>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -82,11 +82,16 @@
       <version>${appengine.target.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>com.google.cloud</groupId>
+      <artifactId>google-cloud-storage</artifactId>
+      <version>1.49.0</version>
+    </dependency>
   </dependencies>
-    
+
   <build>
-    <outputDirectory>target/${project.artifactId}/WEB-INF/classes</outputDirectory> 
-                   
+    <outputDirectory>target/${project.artifactId}/WEB-INF/classes</outputDirectory>
+
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
