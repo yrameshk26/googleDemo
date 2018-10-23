@@ -31,6 +31,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.appengine.api.appidentity.AppIdentityService;
+import com.google.appengine.api.appidentity.AppIdentityServiceFactory;
+import com.google.auth.ServiceAccountSigner;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
@@ -47,6 +50,7 @@ import com.google.cloud.storage.Storage.SignUrlOption;
 public class MailHandlerServlet extends HttpServlet {
 
   private static final Logger log = Logger.getLogger(MailHandlerServlet.class.getName());
+  static final AppIdentityService identityService = AppIdentityServiceFactory.getAppIdentityService();
   Storage storage = StorageOptions.getDefaultInstance().getService();
   Date date= new Date();
   long time = date.getTime();
@@ -93,13 +97,21 @@ public class MailHandlerServlet extends HttpServlet {
     // Unsigned download link
     log.info("uploadedFileurl USUAL: " + blobInfo.getMediaLink());
 
-    // Create ServiceAccountAuthCredentials
-    AccessToken accessToken = new AccessToken("", new Date());
-    GoogleCredentials credentials =
-            GoogleCredentials.create(accessToken);
+
+    SignUrlOption signWith = SignUrlOption.signWith(new ServiceAccountSigner() {
+      @Override
+      public byte[] sign(byte[] toSign) {
+        return identityService.signForApp(toSign).getSignature();
+      }
+
+      @Override
+      public String getAccount() {
+        return identityService.getServiceAccountName();
+      }
+    });
+
     // create signed URL
-    String keyPath = "[PATH_TO_KEY]";
-    URL signedUrl =  storage.get(blobInfo.getBlobId()).signUrl(14,TimeUnit.DAYS, Storage.SignUrlOption.httpMethod(HttpMethod.GET), Storage.SignUrlOption.serviceAccount(credentials));
+    URL signedUrl =  storage.get(blobInfo.getBlobId()).signUrl(60,TimeUnit.SECONDS, signWith);
     log.info("uploadedFileurl SIGNED: " + signedUrl);
   }
 
