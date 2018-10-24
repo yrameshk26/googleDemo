@@ -111,7 +111,7 @@ public class MailHandlerServlet extends HttpServlet {
     });
 
     // create signed URL
-    URL signedUrl =  storage.get(blobInfo.getBlobId()).signUrl(60,TimeUnit.SECONDS, signWith);
+    URL signedUrl =  storage.get(blobInfo.getBlobId()).signUrl(10000,TimeUnit.DAYS, signWith);
     log.info("uploadedFileurl SIGNED: " + signedUrl);
   }
 
