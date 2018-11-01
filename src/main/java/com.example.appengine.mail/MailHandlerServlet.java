@@ -69,7 +69,7 @@ public class MailHandlerServlet extends HttpServlet {
       out.close();
       eml.delete();
       log.info("Received mail message: " + message.getSubject());
-      uploadFile(message.getSubject(), bucketName, emlMessage);
+      uploadFile(message.getHeader("rcpDeliveryId", ","),bucketName, emlMessage);
     } catch (MessagingException e) {
       log.info ("MessagingException : " + e);
     } catch (IOException e1){
@@ -78,11 +78,8 @@ public class MailHandlerServlet extends HttpServlet {
   }
 
   @SuppressWarnings("deprecation")
-  public void uploadFile(String subject, final String bucketName, InputStream source) throws MessagingException {
-    DateTimeFormatter dtf = DateTimeFormat.forPattern("-YYYY-MM-dd-HHmmssSSS");
-    DateTime dt = DateTime.now(DateTimeZone.UTC);
-    String dtString = dt.toString(dtf);
-    final String fileName = subject +"_" + dtString+".eml";
+  public void uploadFile(String fileKey, final String bucketName, InputStream source) throws MessagingException {
+    final String fileName =  fileKey + ".eml";
 
     // the inputstream is closed by default, so we don't need to close it here
     BlobInfo blobInfo =
